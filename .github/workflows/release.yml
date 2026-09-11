@@ -1,0 +1,90 @@
+name: Release builds
+
+on:
+  push:
+    tags:
+      - 'v*'           # запускается при пуше тега вида v1.0.0
+  workflow_dispatch:   # и вручную из вкладки Actions
+
+permissions:
+  contents: write      # нужно, чтобы workflow мог создавать релизы
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: pepega-register-windows
+            asset_name: pepega-register.exe
+            ext: '.exe'
+          - os: ubuntu-latest
+            artifact_name: pepega-register-linux
+            asset_name: pepega-register
+            ext: ''
+          - os: macos-latest
+            artifact_name: pepega-register-macos
+            asset_name: pepega-register-macos
+            ext: ''
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        run: >
+          pyinstaller
+          --onefile
+          --windowed
+          --collect-data customtkinter
+          --name pepega-register
+          client.py
+
+      - name: Rename artifact (Windows)
+        if: runner.os == 'Windows'
+        run: mv dist/pepega-register.exe dist/pepega-register.exe
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/pepega-register${{ matrix.ext }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded files
+        run: find artifacts -type f
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/pepega-register-windows/pepega-register.exe
+            artifacts/pepega-register-linux/pepega-register
+            artifacts/pepega-register-macos/pepega-register-macos
+          draft: false
+          generate_release_notes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
