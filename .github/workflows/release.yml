@@ -53,11 +53,6 @@ jobs:
           --name pepega-register
           client.py
 
-      - name: Rename artifact (Windows)
-        if: runner.os == 'Windows'
-        run: mv dist/pepega-register.exe dist/pepega-register.exe
-        shell: bash
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
