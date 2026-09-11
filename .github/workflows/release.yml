@@ -17,15 +17,9 @@ jobs:
         include:
           - os: windows-latest
             artifact_name: pepega-register-windows
-            asset_name: pepega-register.exe
             ext: '.exe'
           - os: ubuntu-latest
             artifact_name: pepega-register-linux
-            asset_name: pepega-register
-            ext: ''
-          - os: macos-latest
-            artifact_name: pepega-register-macos
-            asset_name: pepega-register-macos
             ext: ''
 
     runs-on: ${{ matrix.os }}
@@ -79,7 +73,6 @@ jobs:
           files: |
             artifacts/pepega-register-windows/pepega-register.exe
             artifacts/pepega-register-linux/pepega-register
-            artifacts/pepega-register-macos/pepega-register-macos
           draft: false
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
