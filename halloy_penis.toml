@@ -1,9 +1,0 @@
-[servers.pepega]
-nickname = "penis"
-server = "irc.pepega.top"
-port = 6690
-tls = true
-
-[servers.pepega.sasl.plain]
-username = "penis"
-password = "penis1234"
